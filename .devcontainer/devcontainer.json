@@ -46,5 +46,10 @@
                 "php-docblocker.useShortNames": true
             }
         }
+    },
+    "postCreateCommand": "service mariadb start",
+    "postStartCommand": ["service apache2 start", "rm -rf /var/www/html && ln -sfn /workspaces/plain-php-codespace-Kadran-fork/src /var/www/html && service apache2 start"],
+    "mounts": ["type=volume,source=mysql-data,target=/var/lib/mysql","source=${localWorkspaceFolder}/src,target=/var/www/html,type=bind"],
+    "forwardPorts": [3306, 80, 8080],
+    "remoteUser": "root"
     }
-}
