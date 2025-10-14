@@ -3,7 +3,7 @@
 
 // RUNNING PHP in port 8080 (in codespaces)
 // run php with an absolute docroot: php -S 0.0.0.0:8080 -t /workspaces/plain-php-codespace-Kadran-fork/src
-// test with "$BROWSER" "http://localhost/Dynamic_page.php"
+// test with "$BROWSER" "http://localhost:8080/Dynamic_page.php"
 // if it is showing default apache2 page do: 
 // rm /var/www/html/index.html and 
 // service apache2 restart
@@ -19,12 +19,18 @@
 // CREATE USER IF NOT EXISTS 'Kadrandev'@'localhost' IDENTIFIED BY 'your_password';
 // GRANT ALL PRIVILEGES ON mydb.* TO 'Kadrandev'@'127.0.0.1';
 // GRANT ALL PRIVILEGES ON mydb.* TO 'Kadrandev'@'localhost';
+
 // acessing mariadb and using mydb database:
 // mariadb --no-defaults --protocol=TCP -h 127.0.0.1 -P 3306 -u Kadrandev -p
 // USE mydb;
 // If its not there Create mydb and the table f1_weekends_2025 for this excercise and insert the data unsing the .sql files in db
 // CREATE DATABASE IF NOT EXISTS mydb;
+
+// inserting the schema and data for f1_weekends_2025 table:
 // SOURCE /workspaces/plain-php-codespace-Kadran-fork/db/Schema_f1_weekends_2025.sql;
+// to test the f1_weekends_table:
+// SELECT * FROM f1_weekends_2025;
+
 
 declare(strict_types=1);
 
@@ -57,7 +63,7 @@ try {
         ]
     );
     $stmt = $pdo->query("
-        SELECT place, timezone, fp1_at, fp2_at, fp3_at, quali_at, race_at
+        SELECT place, timezone, fp1_at, fp2_at, fp3_at, quali_at, race_at, circuit_layout_url
         FROM f1_weekends_2025
         ORDER BY race_at
     ");
@@ -92,19 +98,20 @@ try {
                         <th>FP3</th>
                         <th>Qualifying</th>
                         <th>Race</th>
+                        <th>More</th>
                     </tr>
                 </thead>
                 <tbody>
                 <?php if ($f1Error): ?>
                     <tr>
-                        <td colspan="7">Error: <?= htmlspecialchars($f1Error, ENT_QUOTES, 'UTF-8') ?></td>
+                        <td colspan="8">Error: <?= htmlspecialchars($f1Error, ENT_QUOTES, 'UTF-8') ?></td>
                     </tr>
                 <?php elseif (!$f1Rows): ?>
                     <tr>
-                        <td colspan="7">No data yet. Insert rows into f1_weekends_2025 and refresh.</td>
+                        <td colspan="8">No data yet. Insert rows into f1_weekends_2025 and refresh.</td>
                     </tr>
                 <?php else: ?>
-                    <?php foreach ($f1Rows as $r): ?>
+                    <?php foreach ($f1Rows as $idx => $r): ?>
                         <tr>
                             <td><?= htmlspecialchars($r['place'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($r['timezone'], ENT_QUOTES, 'UTF-8') ?></td>
@@ -113,12 +120,169 @@ try {
                             <td><?= htmlspecialchars($r['fp3_at'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($r['quali_at'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($r['race_at'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td class="toggle-col">
+                                <button
+                                    type="button"
+                                    class="toggle-details"
+                                    aria-expanded="false"
+                                    aria-controls="details-<?= $idx ?>"
+                                    data-target="details-<?= $idx ?>"
+                                >
+                                    Details
+                                </button>
+                            </td>
                         </tr>
+                        <tr id="details-<?= $idx ?>" class="details-row" hidden>
+    <td colspan="8">
+        <div class="details-wrap">
+            <!-- Left: Winner -->
+            <div class="detail-card"><h3>Winner</h3>
+                <div class="winner">
+<?php
+// Use DB values if present; otherwise placeholders
+$winnerName   = $r['winner_name']            ?? 'TBD';
+$winnerTeam   = $r['winner_team_name']       ?? 'TBD';
+$teamIconUrl  = $r['winner_team_icon_url']   ?? '';
+$winnerNation = $r['winner_nationality']     ?? 'TBD';
+$winnerPts    = isset($r['winner_points_total']) ? (int)$r['winner_points_total'] : null;
+$photoUrl     = $r['winner_photo_url']       ?? ''; // driver photo
+$podiumUrl    = $r['podium_photo_url']       ?? ''; // podium photo
+?>
+<?php if ($photoUrl): ?>
+    <img class="winner-photo" src="<?= htmlspecialchars($photoUrl, ENT_QUOTES, 'UTF-8') ?>"
+         alt="<?= htmlspecialchars($winnerName, ENT_QUOTES, 'UTF-8') ?>" />
+<?php else: ?>
+    <div class="winner-photo placeholder" role="img" aria-label="Winner photo placeholder"></div>
+<?php endif; ?>
+                    <div class="winner-meta">
+                        <div class="winner-name"><?= htmlspecialchars($winnerName, ENT_QUOTES, 'UTF-8') ?></div>
+                        <div class="winner-team">
+                            <?php if ($teamIconUrl): ?>
+                                <img class="team-icon" src="<?= htmlspecialchars($teamIconUrl, ENT_QUOTES, 'UTF-8') ?>" alt="" />
+                            <?php endif; ?>
+                            <?= htmlspecialchars($winnerTeam, ENT_QUOTES, 'UTF-8') ?>
+                        </div>
+                        <ul class="winner-attrs">
+                            <li>
+                                <span class="spec-label">Nationality</span>
+                                <span class="spec-value">
+                                    <span class="chip chip-flag"><?= htmlspecialchars($winnerNation, ENT_QUOTES, 'UTF-8') ?></span>
+                                </span>
+                            </li>
+                            <li>
+                                <span class="spec-label">Championship points</span>
+                                <span class="spec-value">
+                                    <?= $winnerPts !== null ? (int)$winnerPts : 'TBD' ?>
+                                </span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="podium-block">
+                    <div class="spec-label">Podium</div>
+<?php if ($podiumUrl): ?>
+                    <img class="podium-photo" src="<?= htmlspecialchars($podiumUrl, ENT_QUOTES, 'UTF-8') ?>"
+                         alt="Podium photo for <?= htmlspecialchars($r['place'] ?? 'Grand Prix', ENT_QUOTES, 'UTF-8') ?>" />
+<?php else: ?>
+                    <div class="podium-photo placeholder" aria-label="Podium photo placeholder"></div>
+<?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Middle: Circuit layout -->
+            <div class="detail-card"><h3>Circuit layout</h3>
+<?php $layout = $r['circuit_layout_url'] ?? ''; ?>
+<?php if ($layout): ?>
+                <img class="layout" src="<?= htmlspecialchars($layout, ENT_QUOTES, 'UTF-8') ?>"
+                     alt="Circuit layout for <?= htmlspecialchars($r['place'] ?? 'TBD', ENT_QUOTES, 'UTF-8') ?>" />
+<?php else: ?>
+                <div class="layout placeholder" aria-label="Circuit layout placeholder"></div>
+<?php endif; ?>
+
+                <div class="layout-specs">
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <span class="spec-label">Total distance</span>
+                            <span class="spec-value">
+                                <?php
+                                $dist = $r['race_distance_km'] ?? null;
+                                $laps = $r['laps'] ?? null;
+                                echo $dist || $laps
+                                    ? trim(($dist ? number_format((float)$dist, 2) . ' km' : '') . ($laps ? " ({$laps} laps)" : ''))
+                                    : 'TBD';
+                                ?>
+                            </span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Tyre compounds</span>
+                            <span class="spec-value">
+                                <span class="chip chip-soft"><?= htmlspecialchars($r['tyre_soft'] ?? 'Soft (TBD)', ENT_QUOTES, 'UTF-8') ?></span>
+                                <span class="chip chip-medium"><?= htmlspecialchars($r['tyre_medium'] ?? 'Medium (TBD)', ENT_QUOTES, 'UTF-8') ?></span>
+                                <span class="chip chip-hard"><?= htmlspecialchars($r['tyre_hard'] ?? 'Hard (TBD)', ENT_QUOTES, 'UTF-8') ?></span>
+                            </span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Starting grid</span>
+                            <span class="spec-value"><?= htmlspecialchars($r['grid_summary'] ?? 'TBD', ENT_QUOTES, 'UTF-8') ?></span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Lap record</span>
+                            <span class="spec-value"><?= htmlspecialchars($r['lap_record'] ?? 'TBD', ENT_QUOTES, 'UTF-8') ?></span>
+                        </div>
+                        <div class="spec-item">
+                            <span class="spec-label">Race lap record</span>
+                            <span class="spec-value"><?= htmlspecialchars($r['race_lap_record'] ?? 'TBD', ENT_QUOTES, 'UTF-8') ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Full classification -->
+            <div class="detail-card"><h3>Full classification</h3>
+                <table class="classification-table">
+                    <thead>
+                        <tr>
+                            <th>Pos</th>
+                            <th>Driver</th>
+                            <th>Team</th>
+                            <th>Finished</th> <!-- renamed from Time/Status -->
+                            <th>Pts</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php for ($pos = 1; $pos <= 20; $pos++): ?>
+                            <tr>
+                                <td><?= $pos ?></td>
+                                <td>Driver <?= $pos ?> (TBD)</td>
+                                <td>TBD</td>
+                                <td>TBD</td> <!-- placeholder finish status -->
+                                <td><?= $pos <= 10 ? [25,18,15,12,10,8,6,4,2,1][$pos-1] : 0 ?></td>
+                            </tr>
+                        <?php endfor; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </td>
+</tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
                 </tbody>
             </table>
-        </section>
+            <script>
+            // Expand/collapse details per row
+            document.addEventListener('click', (e) => {
+                const btn = e.target.closest('.toggle-details');
+                if (!btn) return;
+                const id = btn.getAttribute('data-target');
+                const row = document.getElementById(id);
+                if (!row) return;
+                const expanded = btn.getAttribute('aria-expanded') === 'true';
+                btn.setAttribute('aria-expanded', String(!expanded));
+                row.hidden = expanded;
+            });
+            </script>
     </main>
 </body>
 </html>

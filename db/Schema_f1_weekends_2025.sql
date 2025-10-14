@@ -13,6 +13,7 @@ CREATE TABLE f1_weekends_2025 (
   fp3_at DATETIME NOT NULL,
   quali_at DATETIME NOT NULL,
   race_at DATETIME NOT NULL,
+  circuit_layout_url VARCHAR(255) DEFAULT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_place (place),
   INDEX idx_race_at (race_at)

@@ -1,48 +1,635 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    padding: 0;
+/* Old-school F1 theme (dark, high-contrast, checkered accents) */
+
+:root {
+  --f1-red: #cc0000;
+  --f1-yellow: #ffcc00;
+  --bg: #0b0b0b;
+  --panel: #111111;
+  --panel-2: #0e0e0e;
+  --text: #e8e8e8;
+  --muted: #b3b3b3;
+  --line: #2a2a2a;
+  --row-alt: #0f0f0f;
+  --row-hover: #1a1a1a;
+  --shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
 }
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* Header with subtle checkered band */
 header {
-    background-color: #333;
-    color: #fff;
-    padding: 1rem;
-    text-align: center;
+  padding: 1.2rem 1rem 0.8rem;
+  background:
+    linear-gradient(180deg, rgba(204, 0, 0, 0.15), rgba(204, 0, 0, 0)) no-repeat,
+    var(--panel);
+  border-bottom: 2px solid var(--f1-red);
+  position: relative;
+}
+header::after {
+  content: "";
+  display: block;
+  height: 8px;
+  background:
+    repeating-linear-gradient(45deg, #000 0 10px, #fff 10px 20px);
+  mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+  opacity: 0.12;
+}
+h1, h2, h3 {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+h1 {
+  font-weight: 800;
+  font-size: 1.25rem;
+  text-align: center;
 }
 main {
-    padding: 2rem;
-    text-align: center;
+  padding: 1.6rem 1rem 2.2rem;
+  text-align: center;
 }
 
+/* Section title with racing stripe */
+h2 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.25rem 0.5rem;
+  border-left: 6px solid var(--f1-red);
+  background: linear-gradient(90deg, rgba(204,0,0,0.1), transparent 50%);
+}
+
+/* Main table */
 #f1-weekends-2025 {
-    margin: 2rem auto;              /* center the table */
-    border-collapse: separate;       /* needed for border-radius on tables */
-    border-spacing: 0;
-    border: 1px solid #ddd;
-    border-radius: 12px;             /* rounded corners */
-    overflow: hidden;                /* clip inner corners */
-    background: #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    min-width: 70%;
+  margin: 1.4rem auto 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  width: min(100%, 1200px);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
 }
 
+/* Header row */
+#f1-weekends-2025 thead th {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.25)),
+    var(--f1-red);
+  color: #fff;
+  text-align: left;
+  font-weight: 800;
+  padding: 0.85rem 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  border-bottom: 2px solid #7a0000;
+  letter-spacing: 0.04em;
+}
+
+/* Tighter Full classification table (reduce column widths) */
+.classification-table {
+  table-layout: fixed;      /* enforce fixed distribution */
+  min-width: 0;             /* drop large minimum */
+  font-size: 0.85rem;       /* slightly smaller text */
+}
+
+/* Uniform slim horizontal padding */
+.classification-table th,
+.classification-table td {
+  padding: 0.55rem 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Column width targets (fixed + shrinkable) */
+.classification-table th:nth-child(1),
+.classification-table td:nth-child(1) { width: 3.2ch; }   /* Pos */
+.classification-table th:nth-child(2),
+.classification-table td:nth-child(2) { width: 7.5rem; }  /* Driver */
+.classification-table th:nth-child(3),
+.classification-table td:nth-child(3) { width: 6rem; }    /* Team */
+.classification-table th:nth-child(4),
+.classification-table td:nth-child(4) { width: 6.2rem; }  /* Finished */
+.classification-table th:nth-child(5),
+.classification-table td:nth-child(5) { width: 3.6ch; }   /* Pts */
+
+/* Allow header wrapping if narrow */
+.classification-table thead th {
+  white-space: normal;
+  line-height: 1.1;
+}
+
+/* If very narrow, let Driver & Finished wrap instead of pushing width */
+@media (max-width: 900px) {
+  .classification-table th:nth-child(2),
+  .classification-table td:nth-child(2),
+  .classification-table th:nth-child(4),
+  .classification-table td:nth-child(4) {
+    white-space: normal;
+  }
+}
+
+/* Prevent the card from forcing wide grid if table shrinks */
+.detail-card:has(.classification-table) {
+  min-width: 0;
+}
+
+/* Optional horizontal scroll only if still overflowing */
+.detail-card:has(.classification-table) {
+  position: relative;
+  overflow-x: auto;
+  scrollbar-width: auto;
+  scrollbar-color: var(--f1-red) #222;
+}
+
+/* More obvious horizontal scrollbar for Full classification section */
+.detail-card:has(.classification-table)::-webkit-scrollbar {
+  height: 16px;              /* taller = more obvious */
+  background: #222;
+}
+
+.detail-card:has(.classification-table)::-webkit-scrollbar-track {
+  background:
+    linear-gradient(180deg,#161616,#1e1e1e);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 2px #0c0c0c, inset 0 2px 4px rgba(0,0,0,0.6);
+}
+
+.detail-card:has(.classification-table)::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(90deg,#ff2d2d 0%, #cc0000 40%, #cc0000 60%, #ffcc00 100%);
+  border-radius: 12px;
+  border: 2px solid #0c0c0c;
+  position: relative;
+  box-shadow:
+    0 0 0 1px #330000,
+    inset 0 2px 3px rgba(255,255,255,0.25),
+    inset 0 -2px 3px rgba(0,0,0,0.4);
+}
+
+/* Grip pattern inside the thumb */
+.detail-card:has(.classification-table)::-webkit-scrollbar-thumb:before {
+  content: "";
+  position: absolute;
+  inset: 3px 6px;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.35) 0 6px, transparent 6px 12px);
+  border-radius: 8px;
+}
+
+.detail-card:has(.classification-table)::-webkit-scrollbar-thumb:hover {
+  filter: brightness(1.15);
+}
+
+.detail-card:has(.classification-table)::-webkit-scrollbar-thumb:active {
+  filter: brightness(0.9);
+}
+
+/* Arrow end caps for direction hint */
+.detail-card:has(.classification-table)::before,
+.detail-card:has(.classification-table)::after {
+  content: "◀";
+  position: absolute;
+  bottom: 0;
+  width: 24px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #888;
+  pointer-events: none;
+  text-shadow: 0 1px 2px #000;
+}
+.detail-card:has(.classification-table)::before { left: 2px; }
+.detail-card:has(.classification-table)::after {
+  content: "▶";
+  right: 2px;
+}
+
+/* Fade edges hinting scrollability */
+.detail-card:has(.classification-table) .classification-table {
+  background:
+    linear-gradient(to right, rgba(0,0,0,0.6), transparent 40px) left / 80px 100% no-repeat,
+    linear-gradient(to left, rgba(0,0,0,0.6), transparent 40px) right / 80px 100% no-repeat,
+    #0d0d0d;
+}
+
+/* Retro F1 themed horizontal scrollbar for Full classification section */
+.detail-card:has(.classification-table) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--f1-red) #121212;
+}
+
+.detail-card:has(.classification-table)::-webkit-scrollbar {
+  height: 12px;
+  background: #121212;
+}
+
+.detail-card:has(.classification-table)::-webkit-scrollbar-track {
+  background:
+    linear-gradient(90deg, #121212, #121212),
+    repeating-linear-gradient(45deg,#0d0d0d 0 10px,#161616 10px 20px);
+  border-radius: 999px;
+  margin: 2px 48px 2px 2px;
+}
+
+.detail-card:has(.classification-table)::-webkit-scrollbar-thumb {
+  background:
+    linear-gradient(90deg, var(--f1-red) 0%, #b30000 45%, #ffcc00 55%, #cfa300 100%);
+  border: 2px solid #121212;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px #1e1e1e, inset 0 1px 2px rgba(255,255,255,0.15);
+}
+
+.detail-card:has(.classification-table)::-webkit-scrollbar-thumb:hover {
+  filter: brightness(1.15);
+}
+
+.detail-card:has(.classification-table)::-webkit-scrollbar-thumb:active {
+  filter: brightness(0.9);
+}
+
+/* Optional end-cap accent (right side) */
+.detail-card:has(.classification-table)::after {
+  content: "";
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 42px;
+  height: 10px;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(45deg,#000 0 6px,#fff 6px 12px);
+  opacity: 0.35;
+  border: 1px solid #1d1d1d;
+  border-radius: 6px;
+}
+
+/* Cells and rows */
 #f1-weekends-2025 th,
 #f1-weekends-2025 td {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #eee;
-    text-align: left;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+  vertical-align: middle;
 }
-
-#f1-weekends-2025 thead th {
-    background: #333;
-    color: #fff;
+#f1-weekends-2025 tbody tr:nth-child(even) td {
+  background: var(--row-alt);
 }
-
-#f1-weekends-2025 tr:nth-child(even) td {
-    background: #fafafa;
+#f1-weekends-2025 tbody tr:hover td {
+  background: var(--row-hover);
 }
-
+#f1-weekends-2025 tbody tr:hover td:first-child {
+  box-shadow: inset 4px 0 0 var(--f1-red);
+}
 #f1-weekends-2025 tr:last-child td {
-    border-bottom: 0;
+  border-bottom: 0;
+}
+
+/* Secondary text (Timezone) */
+#f1-weekends-2025 td:nth-child(2) {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+/* Toggle button (old-school metal button) */
+#f1-weekends-2025 .toggle-col { text-align: right; }
+#f1-weekends-2025 .toggle-details {
+  appearance: none;
+  border: 1px solid #5a0000;
+  background: linear-gradient(180deg, #d90000, #8f0000);
+  color: #fff;
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  text-transform: uppercase;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    0 2px 6px rgba(0,0,0,0.5);
+  transition: transform 120ms ease, filter 120ms ease;
+}
+#f1-weekends-2025 .toggle-details:hover { filter: brightness(1.05); }
+#f1-weekends-2025 .toggle-details:active { transform: translateY(1px); }
+#f1-weekends-2025 .toggle-details[aria-expanded="true"] {
+  background: linear-gradient(180deg, #aa0000, #5c0000);
+}
+
+/* Details row: always side-by-side; scroll horizontally if needed */
+#f1-weekends-2025 .details-row td {
+  background: var(--panel-2);
+  padding: 0;               /* inner wrap handles spacing */
+  overflow-x: auto;         /* allow horizontal scroll on narrow screens */
+}
+.details-wrap {
+  display: grid;
+  gap: 1rem;
+  align-items: start;
+  padding: 1rem;
+  /* Force 3 columns at all widths */
+  grid-template-columns:
+    minmax(300px, 1fr)
+    minmax(300px, 1fr)
+    minmax(380px, 1.25fr);
+  /* Ensure grid can exceed viewport and enable scrolling */
+  min-width: 1040px;
+}
+
+/* Cards with retro framing */
+.detail-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.1));
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.9rem;
+  height: 100%;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.detail-card h3 {
+  margin: 0 0 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  display: inline-block;
+  padding: 0.15rem 0.4rem;
+  border-left: 6px solid var(--f1-yellow);
+  background: linear-gradient(90deg, rgba(255,204,0,0.15), transparent 60%);
+}
+
+/* Winner block */
+.winner {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+.winner-photo {
+  width: 92px;
+  height: 92px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 2px solid #222;
+  background: #0c0c0c;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.45);
+}
+.winner-meta .winner-name {
+  font-size: 1.05rem;
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.5);
+}
+.winner-meta .winner-team {
+  color: var(--muted);
+  font-weight: 800;
+}
+.team-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  vertical-align: -4px;
+  margin-right: 0.35rem;
+  filter: saturate(0.9) brightness(0.95);
+}
+
+/* Winner attributes */
+.winner-attrs {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+}
+.winner-attrs li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.winner-attrs .spec-label {
+  min-width: 9rem;
+  color: var(--muted);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+.winner-attrs .spec-value { font-weight: 800; color: var(--text); }
+
+/* Chips (tyres, flags) */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 900;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.04);
+  margin: 0 0.35rem 0.25rem 0;
+}
+.chip::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.9;
+}
+.chip-soft   { color: #ff918a; border-color: rgba(255,145,138,0.3); }
+.chip-medium { color: #ffe08a; border-color: rgba(255,224,138,0.3); }
+.chip-hard   { color: #cfcfcf; border-color: rgba(207,207,207,0.25); }
+.chip-flag {
+  background: rgba(11,92,171,0.15);
+  border: 1px solid rgba(11,92,171,0.35);
+  color: #9fc7f1;
+}
+
+/* Podium photo */
+.podium-block { margin-top: 0.7rem; }
+.podium-photo {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #0d0d0d;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.podium-photo.placeholder {
+  height: 140px;
+  background:
+    linear-gradient(135deg, rgba(204,0,0,0.2), rgba(255,204,0,0.08));
+  border: 2px dashed var(--f1-red);
+}
+
+/* Circuit layout image / placeholder */
+.detail-card img.layout {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 0 0.7rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #0d0d0d;
+}
+.layout.placeholder {
+  width: 100%;
+  height: 180px;
+  border-radius: 8px;
+  background:
+    repeating-linear-gradient(45deg, #0e0e0e 0 12px, #151515 12px 24px);
+  border: 2px dashed var(--f1-red);
+}
+
+/* Circuit specs (single column, retro cards) */
+.layout-specs { margin-top: 0.6rem; }
+.layout-specs .spec-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.55rem;
+}
+.layout-specs .spec-item {
+  display: block;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.08));
+  border: 1px solid var(--line);
+  border-left: 4px solid rgba(255, 204, 0, 0.6);
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+}
+.layout-specs .spec-label {
+  display: block;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 900;
+  color: var(--muted);
+  margin-bottom: 0.15rem;
+}
+.layout-specs .spec-value {
+  display: block;
+  color: var(--text);
+  font-weight: 800;
+}
+
+/* Classification table (compact, retro header) */
+.classification-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0d0d0d;
+  table-layout: auto;     /* allow columns to size to content */
+  min-width: 620px;       /* ensure enough width for header text */
+  font-size: 0.9rem;
+}
+.classification-table thead th {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.25)),
+    var(--f1-red);
+  color: #fff;
+  text-align: left;
+  padding: 0.35rem 0.35rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #6e0000;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: initial;
+}
+.classification-table th,
+.classification-table td {
+  padding: 0.65rem 0.35rem; /* more vertical spacing per row */
+  line-height: 1.35;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.classification-table tbody tr:nth-child(even) td {
+  background: #0f0f0f;
+}
+.classification-table tbody td {
+  padding: 0.9rem 0.35rem;   /* more vertical space */
+  line-height: 1.5;          /* looser line height */
+}
+.classification-table tr + tr td {
+  border-top: 1px solid #181818;
+}
+.classification-table th:nth-child(1),
+.classification-table td:nth-child(1) { /* Pos */
+  text-align: left !important;
+  width: 3.5ch;
+  font-weight: 900;
+  color: #ffd4d4;
+}
+.classification-table th:nth-child(5),
+.classification-table td:nth-child(5) { /* Pts */
+  text-align: left !important;
+  width: 4.5ch;
+  font-weight: 900;
+  color: #ffe9a8;
+}
+.classification-table th:nth-child(2),
+.classification-table td:nth-child(2) {
+  min-width: 9rem;
+  width: 9rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* Narrower Team column, wider Time/Status */
+.classification-table th:nth-child(3),
+.classification-table td:nth-child(3) {
+  min-width: 7rem;
+  width: 7rem;
+}
+
+.classification-table th:nth-child(4),
+.classification-table td:nth-child(4) {
+  min-width: 8rem;
+  width: 8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Optional: allow wrapping in Time/Status if still long */
+.classification-table td:nth-child(4) {
+  white-space: normal;
+}
+
+/* Small tweaks */
+@media (max-width: 640px) {
+  .classification-table { font-size: 0.85rem; }
+  .classification-table th,
+  .classification-table td { padding: 0.3rem 0.4rem; }
+}
+
+/* Scrollbar refinement for details row (WebKit) */
+#f1-weekends-2025 .details-row td::-webkit-scrollbar {
+  height: 10px;
+}
+#f1-weekends-2025 .details-row td::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 999px;
+  border: 2px solid #121212;
+}
+#f1-weekends-2025 .details-row td::-webkit-scrollbar-track {
+  background: #121212;
 }
