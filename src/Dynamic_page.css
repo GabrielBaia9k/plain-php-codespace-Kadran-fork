@@ -148,133 +148,59 @@ h2 {
 /* Optional horizontal scroll only if still overflowing */
 .detail-card:has(.classification-table) {
   position: relative;
+  overflow-x: visible;
+}
+
+/* New: dedicated scroll container with bold red scrollbar for the classification table */
+.classification-scroll {
   overflow-x: auto;
-  scrollbar-width: auto;
-  scrollbar-color: var(--f1-red) #222;
-}
-
-/* More obvious horizontal scrollbar for Full classification section */
-.detail-card:has(.classification-table)::-webkit-scrollbar {
-  height: 16px;              /* taller = more obvious */
-  background: #222;
-}
-
-.detail-card:has(.classification-table)::-webkit-scrollbar-track {
-  background:
-    linear-gradient(180deg,#161616,#1e1e1e);
-  border-radius: 12px;
-  box-shadow: inset 0 0 0 2px #0c0c0c, inset 0 2px 4px rgba(0,0,0,0.6);
-}
-
-.detail-card:has(.classification-table)::-webkit-scrollbar-thumb {
-  background:
-    linear-gradient(90deg,#ff2d2d 0%, #cc0000 40%, #cc0000 60%, #ffcc00 100%);
-  border-radius: 12px;
-  border: 2px solid #0c0c0c;
-  position: relative;
-  box-shadow:
-    0 0 0 1px #330000,
-    inset 0 2px 3px rgba(255,255,255,0.25),
-    inset 0 -2px 3px rgba(0,0,0,0.4);
-}
-
-/* Grip pattern inside the thumb */
-.detail-card:has(.classification-table)::-webkit-scrollbar-thumb:before {
-  content: "";
-  position: absolute;
-  inset: 3px 6px;
-  background:
-    repeating-linear-gradient(90deg, rgba(0,0,0,0.35) 0 6px, transparent 6px 12px);
+  padding-bottom: 8px;                /* ensures the track is visible */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable both-edges;
   border-radius: 8px;
+  background: linear-gradient(90deg, #0f0f0f, #0d0d0d); /* subtle base under scrollbar */
 }
 
-.detail-card:has(.classification-table)::-webkit-scrollbar-thumb:hover {
-  filter: brightness(1.15);
-}
-
-.detail-card:has(.classification-table)::-webkit-scrollbar-thumb:active {
-  filter: brightness(0.9);
-}
-
-/* Arrow end caps for direction hint */
-.detail-card:has(.classification-table)::before,
-.detail-card:has(.classification-table)::after {
-  content: "◀";
-  position: absolute;
-  bottom: 0;
-  width: 24px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  color: #888;
-  pointer-events: none;
-  text-shadow: 0 1px 2px #000;
-}
-.detail-card:has(.classification-table)::before { left: 2px; }
-.detail-card:has(.classification-table)::after {
-  content: "▶";
-  right: 2px;
-}
-
-/* Fade edges hinting scrollability */
-.detail-card:has(.classification-table) .classification-table {
-  background:
-    linear-gradient(to right, rgba(0,0,0,0.6), transparent 40px) left / 80px 100% no-repeat,
-    linear-gradient(to left, rgba(0,0,0,0.6), transparent 40px) right / 80px 100% no-repeat,
-    #0d0d0d;
-}
-
-/* Retro F1 themed horizontal scrollbar for Full classification section */
-.detail-card:has(.classification-table) {
+/* Firefox scrollbar colors */
+.classification-scroll {
   scrollbar-width: thin;
-  scrollbar-color: var(--f1-red) #121212;
+  scrollbar-color: var(--f1-red) #121212; /* thumb | track */
 }
 
-.detail-card:has(.classification-table)::-webkit-scrollbar {
-  height: 12px;
+/* WebKit scrollbar styling (Chrome/Edge/Safari) */
+.classification-scroll::-webkit-scrollbar {
+  height: 14px;
   background: #121212;
 }
-
-.detail-card:has(.classification-table)::-webkit-scrollbar-track {
+.classification-scroll::-webkit-scrollbar-track {
   background:
     linear-gradient(90deg, #121212, #121212),
     repeating-linear-gradient(45deg,#0d0d0d 0 10px,#161616 10px 20px);
   border-radius: 999px;
-  margin: 2px 48px 2px 2px;
+  margin: 2px 48px 2px 2px; /* leave room on right for end-cap accent */
+  box-shadow: inset 0 0 0 1px #1a1a1a;
 }
-
-.detail-card:has(.classification-table)::-webkit-scrollbar-thumb {
+.classification-scroll::-webkit-scrollbar-thumb {
   background:
     linear-gradient(90deg, var(--f1-red) 0%, #b30000 45%, #ffcc00 55%, #cfa300 100%);
   border: 2px solid #121212;
   border-radius: 999px;
   box-shadow: 0 0 0 1px #1e1e1e, inset 0 1px 2px rgba(255,255,255,0.15);
 }
+.classification-scroll::-webkit-scrollbar-thumb:hover { filter: brightness(1.12); }
+.classification-scroll::-webkit-scrollbar-thumb:active { filter: brightness(0.92); }
 
-.detail-card:has(.classification-table)::-webkit-scrollbar-thumb:hover {
-  filter: brightness(1.15);
-}
-
-.detail-card:has(.classification-table)::-webkit-scrollbar-thumb:active {
-  filter: brightness(0.9);
-}
-
-/* Optional end-cap accent (right side) */
-.detail-card:has(.classification-table)::after {
-  content: "";
-  position: absolute;
-  right: 6px;
-  bottom: 6px;
-  width: 42px;
-  height: 10px;
-  pointer-events: none;
+/* Edge fade hints inside the scroll area */
+.classification-scroll .classification-table {
   background:
-    repeating-linear-gradient(45deg,#000 0 6px,#fff 6px 12px);
-  opacity: 0.35;
-  border: 1px solid #1d1d1d;
-  border-radius: 6px;
+    linear-gradient(to right, rgba(0,0,0,0.6), transparent 40px) left / 80px 100% no-repeat,
+    linear-gradient(to left, rgba(0,0,0,0.6), transparent 40px) right / 80px 100% no-repeat,
+    #0d0d0d;
+}
+
+/* Ensure table can trigger horizontal scroll when needed */
+.classification-table {
+  min-width: 700px;  /* widen slightly so the red scrollbar appears on tighter viewports */
 }
 
 /* Cells and rows */
@@ -332,7 +258,7 @@ h2 {
 #f1-weekends-2025 .details-row td {
   background: var(--panel-2);
   padding: 0;               /* inner wrap handles spacing */
-  overflow-x: auto;         /* allow horizontal scroll on narrow screens */
+  overflow-x: visible;      /* scroll handled by .classification-scroll */
 }
 .details-wrap {
   display: grid;

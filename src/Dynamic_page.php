@@ -16,18 +16,19 @@
 // mariadb -u root
 // mariadb was falling back to the Unix socket and not sending your password. Force TCP and ensure the user exists with a password for the right host.
 // creating a TCP user and giving it permissions:
+
+// acessing mariadb and using mydb database:
 // CREATE USER IF NOT EXISTS 'Kadrandev'@'localhost' IDENTIFIED BY 'your_password';
 // GRANT ALL PRIVILEGES ON mydb.* TO 'Kadrandev'@'127.0.0.1';
 // GRANT ALL PRIVILEGES ON mydb.* TO 'Kadrandev'@'localhost';
-
-// acessing mariadb and using mydb database:
 // mariadb --no-defaults --protocol=TCP -h 127.0.0.1 -P 3306 -u Kadrandev -p
 // USE mydb;
+
 // If its not there Create mydb and the table f1_weekends_2025 for this excercise and insert the data unsing the .sql files in db
 // CREATE DATABASE IF NOT EXISTS mydb;
-
 // inserting the schema and data for f1_weekends_2025 table:
 // SOURCE /workspaces/plain-php-codespace-Kadran-fork/db/Schema_f1_weekends_2025.sql;
+// SOURCE /workspaces/plain-php-codespace-Kadran-fork/db/Data_f1_weekends_2025.sql;
 // to test the f1_weekends_table:
 // SELECT * FROM f1_weekends_2025;
 
@@ -223,10 +224,6 @@ $podiumUrl    = $r['podium_photo_url']       ?? ''; // podium photo
                             </span>
                         </div>
                         <div class="spec-item">
-                            <span class="spec-label">Starting grid</span>
-                            <span class="spec-value"><?= htmlspecialchars($r['grid_summary'] ?? 'TBD', ENT_QUOTES, 'UTF-8') ?></span>
-                        </div>
-                        <div class="spec-item">
                             <span class="spec-label">Lap record</span>
                             <span class="spec-value"><?= htmlspecialchars($r['lap_record'] ?? 'TBD', ENT_QUOTES, 'UTF-8') ?></span>
                         </div>
@@ -239,30 +236,32 @@ $podiumUrl    = $r['podium_photo_url']       ?? ''; // podium photo
             </div>
 
             <!-- Right: Full classification -->
-            <div class="detail-card"><h3>Full classification</h3>
-                <table class="classification-table">
-                    <thead>
-                        <tr>
-                            <th>Pos</th>
-                            <th>Driver</th>
-                            <th>Team</th>
-                            <th>Finished</th> <!-- renamed from Time/Status -->
-                            <th>Pts</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php for ($pos = 1; $pos <= 20; $pos++): ?>
-                            <tr>
-                                <td><?= $pos ?></td>
-                                <td>Driver <?= $pos ?> (TBD)</td>
-                                <td>TBD</td>
-                                <td>TBD</td> <!-- placeholder finish status -->
-                                <td><?= $pos <= 10 ? [25,18,15,12,10,8,6,4,2,1][$pos-1] : 0 ?></td>
-                            </tr>
-                        <?php endfor; ?>
-                    </tbody>
-                </table>
-            </div>
+            <div class="detail-card classification-card"><h3>Full classification</h3>
+                <div class="classification-scroll" aria-label="Scroll horizontally to see the full classification">
+                    <table class="classification-table">
+                     <thead>
+                         <tr>
+                             <th>Pos</th>
+                             <th>Driver</th>
+                             <th>Team</th>
+                             <th>Status</th>
+                             <th>Pts</th>
+                         </tr>
+                     </thead>
+                     <tbody>
+                         <?php for ($pos = 1; $pos <= 20; $pos++): ?>
+                             <tr>
+                                 <td><?= $pos ?></td>
+                                 <td>TBD</td>
+                                 <td>TBD</td>
+                                 <td>TBD</td>
+                                 <td><?= $pos <= 10 ? [25,18,15,12,10,8,6,4,2,1][$pos-1] : 0 ?></td>
+                             </tr>
+                         <?php endfor; ?>
+                     </tbody>
+                    </table>
+                </div>
+             </div>
         </div>
     </td>
 </tr>
