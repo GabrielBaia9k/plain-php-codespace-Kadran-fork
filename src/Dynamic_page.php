@@ -52,6 +52,7 @@ $dbPass = 'your_password';
 
 $f1Rows = [];
 $f1Error = null;
+$classByWeekend = [];
 
 try {
     $pdo = new PDO(
@@ -63,12 +64,48 @@ try {
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]
     );
+    // Single query pulling data from:
+    // - w: f1_weekends_2025 (base event info)
+    // - cl: f1_circuit_layout_2025 (circuit details)
+    // - win: f1_winner_2025 (winner details)
     $stmt = $pdo->query("
-        SELECT place, timezone, fp1_at, fp2_at, fp3_at, quali_at, race_at, circuit_layout_url
-        FROM f1_weekends_2025
-        ORDER BY race_at
+        SELECT
+            /* f1_weekends_2025 (w) — base event fields */
+            w.id AS weekend_id,
+            w.place, w.timezone, w.fp1_at, w.fp2_at, w.fp3_at, w.quali_at, w.race_at,
+
+            /* f1_circuit_layout_2025 (cl) — circuit details */
+           cl.circuit_layout_url AS circuit_layout_url,
+            cl.race_distance_km, cl.laps, cl.tyre_soft, cl.tyre_medium, cl.tyre_hard,
+            cl.lap_record, cl.race_lap_record,
+
+            /* f1_winner_2025 (win) — winner details */
+            win.winner_name, win.winner_team_name, win.winner_team_icon_url,
+            win.winner_nationality, win.winner_points_total, win.winner_photo_url, win.podium_photo_url
+        FROM f1_weekends_2025 AS w
+        LEFT JOIN f1_circuit_layout_2025 AS cl ON cl.f1_weekend_id = w.id
+        LEFT JOIN f1_winner_2025 AS win ON win.f1_weekend_id = w.id
+        ORDER BY w.race_at
     ");
     $f1Rows = $stmt->fetchAll();
+    
+    // f1_full_classification_2025 (fc) — per-weekend classification
+    $stmt = $pdo->query("
+        SELECT
+            fc.f1_weekend_id,
+            fc.position,
+            fc.driver_name,
+            fc.team_name,
+            fc.status,
+            fc.points
+        FROM f1_full_classification_2025 AS fc
+        ORDER BY fc.f1_weekend_id, fc.position
+    ");
+    while ($row = $stmt->fetch()) {
+        $wid = (int)$row['f1_weekend_id'];
+        if (!isset($classByWeekend[$wid])) $classByWeekend[$wid] = [];
+        $classByWeekend[$wid][] = $row;
+    }
 } catch (Throwable $e) {
     $f1Error = $e->getMessage();
 }
@@ -249,15 +286,32 @@ $podiumUrl    = $r['podium_photo_url']       ?? ''; // podium photo
                          </tr>
                      </thead>
                      <tbody>
-                         <?php for ($pos = 1; $pos <= 20; $pos++): ?>
-                             <tr>
-                                 <td><?= $pos ?></td>
-                                 <td>TBD</td>
-                                 <td>TBD</td>
-                                 <td>TBD</td>
-                                 <td><?= $pos <= 10 ? [25,18,15,12,10,8,6,4,2,1][$pos-1] : 0 ?></td>
-                             </tr>
-                         <?php endfor; ?>
+                         <?php
+                         $wid = (int)($r['weekend_id'] ?? 0);
+                         $rows = $classByWeekend[$wid] ?? [];
+                         if ($rows):
+                             foreach ($rows as $cr):
+                         ?>
+                            <tr>
+                                <td><?= (int)$cr['position'] ?></td>
+                                <td><?= htmlspecialchars($cr['driver_name'] ?? 'TBD', ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><?= htmlspecialchars($cr['team_name'] ?? 'TBD', ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><?= htmlspecialchars($cr['status'] ?? 'TBD', ENT_QUOTES, 'UTF-8') ?></td>
+                                <td><?= (int)($cr['points'] ?? 0) ?></td>
+                            </tr>
+                         <?php
+                             endforeach;
+                         else:
+                             for ($pos = 1; $pos <= 20; $pos++):
+                         ?>
+                            <tr>
+                                <td><?= $pos ?></td>
+                                <td>TBD</td>
+                                <td>TBD</td>
+                                <td>TBD</td>
+                                <td><?= $pos <= 10 ? [25,18,15,12,10,8,6,4,2,1][$pos-1] : 0 ?></td>
+                            </tr>
+                         <?php endfor; endif; ?>
                      </tbody>
                     </table>
                 </div>
